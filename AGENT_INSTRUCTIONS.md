@@ -5,6 +5,75 @@ The display is **256 LEDs** total, all rows run left→right (no serpentine).
 
 ---
 
+## Setup & connection
+
+The server communicates over **stdio** — the MCP client spawns it as a subprocess.
+
+### Local (Python)
+```bash
+# Install
+cd mcp-wled && uv pip install -e .
+
+# Run (stdio — called by MCP client, not manually)
+python server.py
+```
+
+### Docker
+```bash
+# Build
+docker compose build
+
+# The MCP client runs the container on demand:
+docker run --rm -i --network host --env-file .env mcp-wled
+```
+
+### Claude Desktop / claude_desktop_config.json
+
+**Local:**
+```json
+{
+  "mcpServers": {
+    "wled": {
+      "command": "python",
+      "args": ["/path/to/mcp-wled/server.py"],
+      "env": {
+        "WLED_HOST": "192.168.50.111",
+        "MATRIX_SERPENTINE": "false",
+        "DEFAULT_BRIGHTNESS": "128"
+      }
+    }
+  }
+}
+```
+
+**Docker:**
+```json
+{
+  "mcpServers": {
+    "wled": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "--network", "host",
+               "--env-file", "/path/to/mcp-wled/.env",
+               "mcp-wled"]
+    }
+  }
+}
+```
+
+### Environment variables
+| Variable | Default | Description |
+|---|---|---|
+| `WLED_HOST` | `wled.local` | WLED device IP or hostname |
+| `WLED_PORT` | `80` | WLED HTTP port |
+| `MATRIX_WIDTH` | `16` | Matrix width in pixels |
+| `MATRIX_HEIGHT` | `16` | Matrix height in pixels |
+| `MATRIX_SERPENTINE` | `false` | Serpentine wiring (false = all rows L→R) |
+| `DEFAULT_BRIGHTNESS` | `128` | Default brightness 0–255 |
+
+---
+
+---
+
 ## Display constraints
 
 | Property | Value |
